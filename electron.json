@@ -1,0 +1,13 @@
+{
+    "appId": "com.popcode.simples3",
+    "mac": {
+        "category": "tools"
+    },
+    "files": ["build/**/*", "node_modules/**/*", "electron.js"],
+    "directories": {
+        "buildResources": "assets"
+    },
+    "extraMetadata": {
+        "main": "electron.js"
+    }
+}

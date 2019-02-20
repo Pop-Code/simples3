@@ -1,5 +1,5 @@
 {
-    "name": "SimpleS3",
+    "name": "simples3",
     "version": "0.1.0",
     "description": "A simple Amazon s3 browser",
     "author": "Alex Hermann <alex.hermann@pop-code.com>",
@@ -55,10 +55,12 @@
     "main": "electron.js",
     "scripts": {
         "start": "react-scripts start",
-        "build": "react-scripts build",
-        "build:electron": "electron-builder -c electron.json",
         "start:electron": "ELECTRON_START_URL=http://localhost:3000 electron electron.js",
-        "postinstall": "electron-builder install-app-deps",
+        "build": "react-scripts build",
+        "build:electron": "build -mwl -c electron.json",
+        "postinstall": "build install-app-deps",
+        "h": "build -h",
+        "release": "yarn build:electron --publish always",
         "format": "prettier --write \"src/**/*.ts\"",
         "test": "react-scripts test",
         "eject": "react-scripts eject"

@@ -3,6 +3,10 @@
     "mac": {
         "category": "tools"
     },
+    "publish": {
+        "provider": "github",
+        "owner": "Pop-Code"
+    },
     "files": ["build/**/*", "node_modules/**/*", "electron.js"],
     "directories": {
         "buildResources": "assets"

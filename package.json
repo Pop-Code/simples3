@@ -1,6 +1,6 @@
 {
     "name": "simples3",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "description": "A simple Amazon s3 browser",
     "author": "Pop-Code <alex.hermann@pop-code.com>",
     "private": true,

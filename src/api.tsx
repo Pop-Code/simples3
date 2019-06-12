@@ -178,7 +178,8 @@ export function upload(
         const query: AWS.S3.Types.PutObjectRequest = {
             Body: request.file,
             Key: request.file.name,
-            Bucket: request.bucketName
+            Bucket: request.bucketName,
+            ContentType: request.file.type
         };
         return s3
             .upload(query)

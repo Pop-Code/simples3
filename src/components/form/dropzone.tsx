@@ -8,7 +8,7 @@ const styles = (theme: Theme) =>
             borderColor: theme.palette.grey[500],
             borderWidth: 1,
             borderStyle: 'dashed',
-            padding: theme.spacing.unit * 5,
+            padding: theme.spacing(5),
             borderRadius: theme.shape.borderRadius,
             textAlign: 'center',
             transition: theme.transitions.create('all', {

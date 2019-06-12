@@ -2,27 +2,29 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import LoginForm from './form';
 import { Grid, Paper, Button, Typography, LinearProgress, Theme, createStyles, withStyles } from '@material-ui/core';
+import { LoginRequest } from './actions';
 
 const styles = (theme: Theme) =>
     createStyles({
         root: {
+            ['-webkit-app-region']: 'drag',
             backgroundColor: theme.palette.primary.main,
             height: '100%'
         },
         grid: {
             minHeight: '100vh',
-            padding: theme.spacing.unit * 5,
+            padding: theme.spacing(5),
             [theme.breakpoints.down('sm')]: {
-                padding: theme.spacing.unit * 3
+                padding: theme.spacing(3)
             }
         },
         paper: {
             ...theme.mixins.gutters(),
-            paddingTop: theme.spacing.unit * 3,
-            paddingBottom: theme.spacing.unit * 3
+            paddingTop: theme.spacing(3),
+            paddingBottom: theme.spacing(3)
         },
         button: {
-            marginTop: theme.spacing.unit * 3
+            marginTop: theme.spacing(3)
         },
         loading: {
             position: 'fixed',
@@ -34,7 +36,7 @@ const styles = (theme: Theme) =>
 
 interface LoginViewProps {
     classes: any;
-    login: (request: any) => void;
+    login: (request: LoginRequest) => void;
     logout: () => void;
     loading: boolean;
 }
@@ -78,15 +80,14 @@ class LoginView extends React.Component<LoginViewProps> {
                     >
                         <Grid item xs={12} sm={8} md={6} lg={4}>
                             <Paper className={classes.paper}>
-                                <Typography align="center" variant="h5" component="h2" gutterBottom>
-                                    SIGN IN
+                                <Typography align="center" color="primary" variant="h2">
+                                    SimpleS3
                                 </Typography>
                                 <LoginForm
                                     ref="loginForm"
                                     onSubmit={this.login}
                                     initialValues={{
-                                        region: 'eu-west-3',
-                                        bucketName: 'export-aquarelle'
+                                        region: 'eu-west-3'
                                     }}
                                 />
                                 <Button

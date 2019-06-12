@@ -2,7 +2,8 @@
  * @module context
  */
 
-import { createMuiTheme, createGenerateClassName } from '@material-ui/core/styles';
+import { createGenerateClassName } from '@material-ui/styles';
+import { createMuiTheme } from '@material-ui/core/styles';
 
 const theme = createMuiTheme({
     palette: {
@@ -22,9 +23,6 @@ const theme = createMuiTheme({
         /*primary: {
             main: deepOrange[600]
         }*/
-    },
-    typography: {
-        useNextVariants: true
     }
 });
 

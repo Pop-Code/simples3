@@ -1,5 +1,6 @@
 import React from 'react';
-import { MuiThemeProvider, CssBaseline } from '@material-ui/core';
+import { ThemeProvider } from '@material-ui/styles';
+import { CssBaseline } from '@material-ui/core';
 import { getPageContext } from './context';
 import { Provider } from 'react-redux';
 import { createReduxStore, createHistory } from './store';
@@ -29,12 +30,12 @@ export default class Client extends React.Component {
     render() {
         return (
             <Provider store={this.store}>
-                <MuiThemeProvider theme={this.pageContext.theme}>
+                <ThemeProvider theme={this.pageContext.theme}>
                     <CssBaseline />
                     <Router history={this.history}>
                         <App />
                     </Router>
-                </MuiThemeProvider>
+                </ThemeProvider>
             </Provider>
         );
     }

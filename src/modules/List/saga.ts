@@ -1,7 +1,11 @@
 import { takeLatest, call, put, select } from 'redux-saga/effects';
 import { list } from '../../api';
-import { loadData, loadDataDone } from '../Loader';
+import { loadData, loadDataDone, selectLoaderAtPath } from '../Loader';
 import { fromJS } from 'immutable';
+import { selectFile } from './actions';
+import { setState, selectDataAtPath } from '../Data';
+import _ from 'lodash';
+import { Map } from 'immutable';
 
 function* listSaga(action: any) {
     try {
@@ -25,4 +29,15 @@ export default function* saga() {
             yield put(loadData({}, 'list'));
         }
     );
+    yield takeLatest(selectFile, function*(action) {
+        // get all files from state
+        let files: Map<String, any> = yield select(s => selectDataAtPath(s, ['selectedFiles'], Map<String, any>()));
+        const { Key } = action.payload.file;
+        if (files.has(Key)) {
+            files = files.delete(Key);
+        } else {
+            files = files.set(Key, fromJS(action.payload.file));
+        }
+        yield put(setState(files, 'selectedFiles'));
+    });
 }

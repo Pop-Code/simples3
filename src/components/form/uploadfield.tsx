@@ -15,9 +15,9 @@ import {
     Typography,
     LinearProgress
 } from '@material-ui/core';
+import moment from 'moment';
 
 const progressPercent = (loaded: number, total: number) => {
-    console.log(Math.round((loaded * 100) / total));
     return Math.round((loaded * 100) / total);
 };
 
@@ -27,6 +27,12 @@ const UploadProgress = (props: any) => {
             variant="determinate"
             color="secondary"
             value={props.progress ? progressPercent(props.progress.loaded, props.progress.total) : 0}
+            style={{
+                marginTop: 5,
+                marginLeft: 10,
+                marginRight: 10,
+                marginBottom: 15
+            }}
         />
     );
 };
@@ -54,6 +60,17 @@ const renderUploadField = (props: any) => {
                         const loaderState = _.get(uploadItems, index, null);
                         const loaderLoading = _.get(loaderState, 'loading', false);
                         const loaderError = _.get(loaderState, 'error.message', null);
+                        const loaderDuration = _.get(loaderState, 'duration', null);
+                        let secondaryText = '';
+                        let secondaryTypographyProps = {};
+                        if (!loaderError && loaderDuration && !loaderLoading) {
+                            secondaryText = `Done in ${moment.duration(loaderDuration, 'ms').asSeconds()}s`;
+                            secondaryTypographyProps = { color: 'primary' };
+                        }
+                        if (loaderError) {
+                            secondaryText = loaderError;
+                            secondaryTypographyProps = { color: 'error' };
+                        }
                         return (
                             <div key={a.name}>
                                 <ListItem>
@@ -62,7 +79,11 @@ const renderUploadField = (props: any) => {
                                             <FileIcon />
                                         </Avatar>
                                     </ListItemAvatar>
-                                    <ListItemText primary={a.name} />
+                                    <ListItemText
+                                        primary={a.name}
+                                        secondary={secondaryText}
+                                        secondaryTypographyProps={secondaryTypographyProps}
+                                    />
                                     <ListItemSecondaryAction>
                                         <IconButton
                                             aria-label="Delete"
@@ -72,7 +93,6 @@ const renderUploadField = (props: any) => {
                                         </IconButton>
                                     </ListItemSecondaryAction>
                                 </ListItem>
-                                {loaderError && <Typography color="error">{loaderError}</Typography>}
                                 {loaderLoading && <UploadProgress progress={loaderState.progress} />}
                             </div>
                         );
@@ -81,7 +101,6 @@ const renderUploadField = (props: any) => {
         </div>
     );
 };
-
 export default function ReduxUploadField(props: any) {
     return <Field {...props} />;
 }

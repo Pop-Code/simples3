@@ -10,7 +10,7 @@ const styles = (theme: any) => {
     return createStyles({
         withToolbar: theme.mixins.toolbar,
         error404: {
-            margin: theme.spacing.unit * 5
+            margin: theme.spacing(5)
         }
     });
 };
@@ -18,14 +18,16 @@ const styles = (theme: any) => {
 interface AppProps {
     classes: any;
     auth: any;
+    location: any;
 }
 
 class App extends React.Component<AppProps> {
     render() {
-        const { classes, auth } = this.props;
+        const { classes, auth, location } = this.props;
+        console.log(location);
         return (
             <main>
-                {auth && (
+                {auth && !/^\/login/g.test(location.pathname) && (
                     <>
                         <Header auth={auth} />
                         <div className={classes.withToolbar} />

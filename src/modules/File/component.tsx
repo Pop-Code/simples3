@@ -3,38 +3,45 @@ import { Theme, LinearProgress, Grid, Paper, Typography, Fab, withStyles, create
 import { CloudDownload as DownloadIcon } from '@material-ui/icons';
 import prettyBytes from 'pretty-bytes';
 import moment from 'moment';
-import _ from 'lodash';
+import { AWSFile } from './types';
+import { getSignedUrl, GetRequest } from '../../api';
 
 const styles = (theme: Theme) =>
     createStyles({
         root: {
             flexGrow: 1,
-            padding: theme.spacing.unit * 5,
+            padding: theme.spacing(5),
             [theme.breakpoints.down('sm')]: {
-                padding: theme.spacing.unit * 3
+                padding: theme.spacing(3)
             }
         },
         paper: {
             ...theme.mixins.gutters(),
-            paddingTop: theme.spacing.unit * 3,
-            paddingBottom: theme.spacing.unit * 3
+            paddingTop: theme.spacing(3),
+            paddingBottom: theme.spacing(3)
         },
         fab: {
             margin: 0,
             top: 'auto',
-            bottom: theme.spacing.unit * 2,
-            right: theme.spacing.unit * 2,
+            bottom: theme.spacing(2),
+            right: theme.spacing(2),
             position: 'fixed'
+        },
+        loading: {
+            position: 'fixed',
+            left: 0,
+            right: 0,
+            bottom: 0
         }
     });
 
 export interface FileViewProps {
     filename: string;
-    data: any;
+    data: AWSFile;
     error: any;
     loading: boolean;
     classes: any;
-    view: (request: any) => void;
+    view: (request: GetRequest) => void;
 }
 
 export class FileView extends React.Component<FileViewProps> {
@@ -47,9 +54,9 @@ export class FileView extends React.Component<FileViewProps> {
         const { filename, loading, classes, error, data, view } = this.props;
         return (
             <>
-                {loading && <LinearProgress variant="indeterminate" color="secondary" />}
+                {loading && <LinearProgress className={classes.loading} variant="indeterminate" color="secondary" />}
                 <div className={classes.root}>
-                    <Grid container spacing={24}>
+                    <Grid container spacing={3}>
                         {error && (
                             <Grid item xs={12}>
                                 <Typography variant="body1" color="error">
@@ -67,24 +74,21 @@ export class FileView extends React.Component<FileViewProps> {
                                             </Typography>
                                             <Typography component="p">Name: {filename}</Typography>
                                             <Typography component="p">
-                                                Size:{' '}
-                                                {_.has(data, 'ContentLength')
-                                                    ? prettyBytes(data.ContentLength)
-                                                    : 'Unknow'}
+                                                Size: {data.ContentLength ? prettyBytes(data.ContentLength) : 'Unknow'}
                                             </Typography>
                                             <Typography component="p">
-                                                Type: {_.get(data, 'ContentType', 'Unknow')}
+                                                Type: {data.ContentType ? data.ContentType : 'Unknow'}
                                             </Typography>
                                             <Typography component="p">
                                                 Last modified:{' '}
-                                                {_.has(data, 'LastModified')
+                                                {data.LastModified
                                                     ? moment(data.LastModified).format('LLLL')
                                                     : 'Unknow'}
                                             </Typography>
                                         </Paper>
                                     </Typography>
                                 </Grid>
-                                {_.has(data, 'Metadata') && (
+                                {data.Metadata && (
                                     <Grid item xs={12} md={6}>
                                         <Typography variant="h5" component="h2" color="primary">
                                             <Paper className={classes.paper}>
@@ -101,7 +105,9 @@ export class FileView extends React.Component<FileViewProps> {
                                 <Fab
                                     className={classes.fab}
                                     color="secondary"
-                                    onClick={() => view({ filename, download: true })}
+                                    onClick={() => {
+                                        if (data.url) window.location.href = data.url;
+                                    }}
                                 >
                                     <DownloadIcon />
                                 </Fab>

@@ -1,13 +1,11 @@
 import { loadData } from '../Loader';
+import { APIRequest, BucketSelector } from '../../api';
 
-export const login = (request: {
-    credentials: {
-        accessKeyId: string;
-        secretAccessKey: string;
-        region?: string;
-        bucketName?: string;
-    };
+export interface LoginRequest {
+    credentials: APIRequest & BucketSelector;
     redirectAfter?: string;
-}) => loadData(request, 'login');
+}
+
+export const login = (request: LoginRequest) => loadData(request, 'login');
 
 export const logout = () => ({ type: 'LOGOUT' });

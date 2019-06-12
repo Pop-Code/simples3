@@ -1,7 +1,17 @@
 import AWS from 'aws-sdk';
 import { Progress } from 'aws-sdk/lib/request';
-import Joi from 'joi';
 import { List } from 'immutable';
+import Joi from 'joi';
+
+export interface APIRequest {
+    accessKeyId: string;
+    secretAccessKey: string;
+    region: string;
+}
+
+export interface BucketSelector {
+    bucketName: string;
+}
 
 export const authSchema = Joi.object().keys({
     accessKeyId: Joi.string().required(),
@@ -10,7 +20,29 @@ export const authSchema = Joi.object().keys({
     bucketName: Joi.string().required()
 });
 
-export async function list(request: any) {
+export async function login(request: APIRequest) {
+    const validation = Joi.validate(request, authSchema, {
+        abortEarly: false,
+        allowUnknown: true
+    });
+    if (validation.error) {
+        throw validation.error;
+    }
+
+    const sts = new AWS.STS({
+        accessKeyId: request.accessKeyId,
+        secretAccessKey: request.secretAccessKey,
+        region: request.region
+    });
+
+    const identity = await sts.getCallerIdentity().promise();
+
+    return identity;
+}
+
+export interface ListRequest {}
+
+export async function list(request: APIRequest & BucketSelector) {
     try {
         const validation = Joi.validate(request, authSchema, {
             abortEarly: false,
@@ -34,6 +66,7 @@ export async function list(request: any) {
             if (token) {
                 query.ContinuationToken = token;
             }
+
             const s3Response = await s3.listObjectsV2(query).promise();
             const listconcat = List(s3Response.Contents as any);
             accumulator = accumulator.concat(listconcat);
@@ -57,27 +90,10 @@ export async function list(request: any) {
     }
 }
 
-export async function login(request: any) {
-    const validation = Joi.validate(request, authSchema, {
-        abortEarly: false,
-        allowUnknown: true
-    });
-    if (validation.error) {
-        throw validation.error;
-    }
-
-    const sts = new AWS.STS({
-        accessKeyId: request.accessKeyId,
-        secretAccessKey: request.secretAccessKey,
-        region: request.region
-    });
-
-    const identity = await sts.getCallerIdentity().promise();
-
-    return identity;
+export interface GetRequest {
+    filename: string;
 }
-
-export function getFile(request: any) {
+export function getFile(request: GetRequest & BucketSelector & APIRequest) {
     try {
         const fileSchema = authSchema.keys({
             filename: Joi.string().required()
@@ -94,21 +110,50 @@ export function getFile(request: any) {
             secretAccessKey: request.secretAccessKey,
             region: request.region
         });
-        const query: any = {
+        const query: AWS.S3.Types.GetObjectRequest = {
             Key: request.filename,
             Bucket: request.bucketName
         };
-        if (!request.download) {
-            return s3.headObject(query).promise();
-        } else {
-            return s3.getObject(query).promise();
-        }
+        return s3.headObject(query).promise();
     } catch (e) {
         throw new Error('Can not get file: ' + e.message);
     }
 }
 
-export function upload(request: any, onUploadProgress: (progress: Progress, file: File) => void) {
+export function getSignedUrl(request: GetRequest & BucketSelector & APIRequest) {
+    try {
+        const fileSchema = authSchema.keys({
+            filename: Joi.string().required()
+        });
+        const validation = Joi.validate(request, fileSchema, {
+            abortEarly: false,
+            allowUnknown: true
+        });
+        if (validation.error) {
+            throw validation.error;
+        }
+        const s3 = new AWS.S3({
+            accessKeyId: request.accessKeyId,
+            secretAccessKey: request.secretAccessKey,
+            region: request.region
+        });
+        const query: AWS.S3.Types.GetObjectRequest = {
+            Key: request.filename,
+            Bucket: request.bucketName
+        };
+        return s3.getSignedUrl('getObject', query);
+    } catch (e) {
+        throw new Error('Can not get file: ' + e.message);
+    }
+}
+
+export interface UploadRequest {
+    file: File;
+}
+export function upload(
+    request: UploadRequest & BucketSelector & APIRequest,
+    onUploadProgress: (progress: Progress, file: File) => void
+) {
     const uploadSchema = authSchema.keys({
         file: Joi.object()
             .type(File)
@@ -130,7 +175,7 @@ export function upload(request: any, onUploadProgress: (progress: Progress, file
             secretAccessKey: request.secretAccessKey,
             region: request.region
         });
-        const query: any = {
+        const query: AWS.S3.Types.PutObjectRequest = {
             Body: request.file,
             Key: request.file.name,
             Bucket: request.bucketName
@@ -143,5 +188,37 @@ export function upload(request: any, onUploadProgress: (progress: Progress, file
             .promise();
     } catch (e) {
         throw new Error('Can not upload files: ' + e.message);
+    }
+}
+
+export interface DeleteRequest {
+    files: string[];
+}
+export function deleteFile(request: DeleteRequest & BucketSelector & APIRequest) {
+    try {
+        const fileSchema = authSchema.keys({
+            files: Joi.array().items(Joi.string().required())
+        });
+        const validation = Joi.validate(request, fileSchema, {
+            abortEarly: false,
+            allowUnknown: true
+        });
+        if (validation.error) {
+            throw validation.error;
+        }
+        const s3 = new AWS.S3({
+            accessKeyId: request.accessKeyId,
+            secretAccessKey: request.secretAccessKey,
+            region: request.region
+        });
+        const query: AWS.S3.Types.DeleteObjectsRequest = {
+            Delete: {
+                Objects: request.files.map(f => ({ Key: f }))
+            },
+            Bucket: request.bucketName
+        };
+        return s3.deleteObjects(query).promise();
+    } catch (e) {
+        throw new Error('Can not delete file: ' + e.message);
     }
 }

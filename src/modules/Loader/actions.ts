@@ -10,9 +10,9 @@ const actions = createActions({
 
 export const { loadData, loadDataUpdate, loadDataDone, resetData } = actions;
 
-export const selectLoaderAtPath = (state: Map<any, any>, paths: string[], defaultValue: any) => {
+export const selectLoaderAtPath = <T = any>(state: Map<any, any>, paths: string[], defaultValue?: T): T => {
     const data = state.getIn(['loader', ...paths]);
-    if (!data) {
+    if (!data && defaultValue) {
         return defaultValue;
     }
     return data;

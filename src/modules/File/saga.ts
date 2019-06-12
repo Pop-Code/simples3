@@ -1,24 +1,17 @@
 import { takeLatest, call, put, select } from 'redux-saga/effects';
-import { getFile } from '../../api';
+import { getFile, getSignedUrl } from '../../api';
 import { loadDataDone } from '../Loader';
 import { fromJS } from 'immutable';
-import FileSaver from 'file-saver';
 
 function* viewSaga(action: any) {
     try {
         const credentials = yield select(state => state.getIn(['data', 'credentials']));
         let params = fromJS(action.payload || {});
         params = params.merge(credentials);
-        const data = yield call(getFile, params.toJS());
+        const request = params.toJS();
+        const data = yield call(getFile, request);
 
-        // download the file, replace the response, but remove the content.
-        if (params.get('download')) {
-            const blob = new Blob([data.Body], { type: data.ContentType });
-            FileSaver.saveAs(blob, params.get('filename'));
-            // delete the content
-            delete data.Body;
-        }
-        yield put(loadDataDone(data, action.meta));
+        yield put(loadDataDone({ ...data, url: getSignedUrl(request) }, action.meta));
     } catch (e) {
         yield put(loadDataDone(e, action.meta));
     }

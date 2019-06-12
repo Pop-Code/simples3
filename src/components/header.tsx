@@ -28,13 +28,13 @@ const styles = (theme: any) =>
             transition: theme.transitions.create('background-color', {
                 delay: 200
             }),
-            marginRight: theme.spacing.unit * 2,
+            marginRight: theme.spacing(2),
             marginLeft: 0
         },
         searchIcon: {
-            width: theme.spacing.unit * 9,
+            width: theme.spacing(9),
             [theme.breakpoints.down('xs')]: {
-                width: theme.spacing.unit * 5
+                width: theme.spacing(5)
             },
             height: '100%',
             position: 'absolute',
@@ -53,12 +53,12 @@ const styles = (theme: any) =>
         },
         inputInput: {
             width: '100%',
-            paddingTop: theme.spacing.unit,
-            paddingRight: theme.spacing.unit,
-            paddingBottom: theme.spacing.unit,
-            paddingLeft: theme.spacing.unit * 9,
+            paddingTop: theme.spacing(1),
+            paddingRight: theme.spacing(1),
+            paddingBottom: theme.spacing(1),
+            paddingLeft: theme.spacing(9),
             [theme.breakpoints.down('xs')]: {
-                paddingLeft: theme.spacing.unit * 5
+                paddingLeft: theme.spacing(5)
             }
         }
     });
@@ -123,7 +123,9 @@ class Header extends React.Component<HeaderProps> {
                             <div>
                                 <IconButton
                                     color="inherit"
-                                    component={(props: any) => <NavLink to="/list" {...props} />}
+                                    component={React.forwardRef((props: any, ref) => (
+                                        <NavLink to="/list" {...props} innerRef={ref} />
+                                    ))}
                                 >
                                     <List />
                                 </IconButton>

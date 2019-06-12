@@ -1,13 +1,15 @@
-import { takeLatest, takeEvery, delay, take, call, put, select } from 'redux-saga/effects';
-import { eventChannel } from 'redux-saga';
-import { loadData, loadDataUpdate, loadDataDone } from '../Loader';
-import { upload as uploadApi } from '../../api';
 import { Progress } from 'aws-sdk/lib/request';
+import { eventChannel } from 'redux-saga';
+import { all, call, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
+import { upload as uploadApi } from '../../api';
+import { list } from '../List';
+import { loadData, loadDataDone, loadDataUpdate, resetData } from '../Loader';
 
 function uploadApiWithProgress(action: any) {
     return eventChannel(emitter => {
         const asyncUpload = async () => {
             try {
+                emitter(resetData(action.meta));
                 const response = await uploadApi(action.payload, (progress: Progress) => {
                     emitter(loadDataUpdate({ progress }, action.meta));
                 });
@@ -17,7 +19,7 @@ function uploadApiWithProgress(action: any) {
             }
         };
         asyncUpload();
-        return () => console.log('Done ?');
+        return () => console.log('upload done');
     });
 }
 
@@ -35,24 +37,34 @@ export function* uploadSaga(action: any) {
 
 function* batchUploadSaga(action: any) {
     const credentials = yield select(state => state.getIn(['data', 'credentials']).toJS());
+    const tasks = [];
     for (const [index, file] of action.payload.files.entries()) {
-        yield put(
-            loadData(
-                {
-                    ...credentials,
-                    file
-                },
-                `${action.meta}.items.${index}`
+        tasks.push(
+            put(
+                loadData(
+                    {
+                        ...credentials,
+                        file
+                    },
+                    `${action.meta}.items.${index}`
+                )
             )
         );
-        yield delay(300);
     }
+    // start all upload tasks
+    yield all(tasks);
+
+    // wait for dialog to be closed, and reload list
+    yield takeLatest(
+        (action: any) => action.type === 'DELETE_STATE' && action.meta === 'showUploadDialog',
+        function*() {
+            yield put(list());
+        }
+    );
 }
 
 export default function* saga() {
-    // TODO do not use the loader reducer to perform upload
     yield takeLatest((action: any) => action.type === 'LOAD_DATA' && action.meta === 'upload', batchUploadSaga);
-
     yield takeEvery(
         (action: any) => action.type === 'LOAD_DATA' && /^upload\.items\..+$/.test(action.meta),
         uploadSaga

@@ -2,6 +2,7 @@ import { connect } from 'react-redux';
 import FileView, { FileViewProps } from './component';
 import { view, getData } from './actions';
 import { withImmutablePropsToJS } from '../../components';
+import { AWSFile } from './types';
 import _ from 'lodash';
 
 export default connect(
@@ -9,9 +10,9 @@ export default connect(
         const filename = _.get(props, 'match.params.filename');
         return {
             filename,
-            data: getData(state, filename, ['data'], null),
+            data: getData<AWSFile>(state, filename, ['data']),
             error: getData(state, filename, ['error'], null),
-            loading: getData(state, filename, ['loading'], false)
+            loading: getData<boolean>(state, filename, ['loading'], false)
         };
     },
     { view }

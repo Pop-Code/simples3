@@ -1,22 +1,23 @@
+import {
+    Button,
+    createStyles,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Theme,
+    withStyles
+} from '@material-ui/core';
 import React, { createRef, RefObject } from 'react';
 import UploadForm from './form';
-import {
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Button,
-    withStyles,
-    createStyles,
-    Theme
-} from '@material-ui/core';
 
 const styles = (theme: Theme) => createStyles({});
 
 export interface UploadViewProps {
+    acceptedFiles: any[];
     uploadItems: any[];
     open: boolean;
-    upload: (request: any) => void;
+    upload: (request: { files: File[] }) => void;
     onClose: () => void;
 }
 
@@ -35,8 +36,12 @@ class UploadView extends React.Component<UploadViewProps> {
         });
     }
 
+    static defaultProps: Partial<UploadViewProps> = {
+        open: false
+    };
+
     render() {
-        const { open, onClose, uploadItems } = this.props;
+        const { open, onClose, uploadItems, acceptedFiles } = this.props;
         return (
             <Dialog fullWidth maxWidth="sm" open={open} onClose={onClose} aria-labelledby="form-dialog-title">
                 <DialogTitle id="form-dialog-title">Upload</DialogTitle>
@@ -45,11 +50,13 @@ class UploadView extends React.Component<UploadViewProps> {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={this.props.onClose} color="primary">
-                        Cancel
+                        Close
                     </Button>
-                    <Button onClick={() => this.uploadForm.current.submit()} color="secondary">
-                        Upload
-                    </Button>
+                    {acceptedFiles.length > 0 && (
+                        <Button onClick={() => this.uploadForm.current.submit()} color="secondary">
+                            Upload
+                        </Button>
+                    )}
                 </DialogActions>
             </Dialog>
         );

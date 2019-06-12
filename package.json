@@ -1,8 +1,8 @@
 {
     "name": "simples3",
-    "version": "1.0.0",
+    "version": "0.2.0",
     "description": "A simple Amazon s3 browser",
-    "author": "Alex Hermann <alex.hermann@pop-code.com>",
+    "author": "Pop-Code <alex.hermann@pop-code.com>",
     "private": true,
     "dependencies": {
         "@babel/core": "^7.2.2",

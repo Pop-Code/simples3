@@ -4,7 +4,7 @@ import { setState, deleteState } from '../Data';
 import { stopSubmit } from 'redux-form/immutable';
 import { ValidationError } from 'joi';
 import { push } from 'connected-react-router';
-import { setCredentials } from './storage';
+import { setCredentials, clearCredentials } from './storage';
 import { login } from './actions';
 import { login as loginApi } from '../../api';
 
@@ -14,7 +14,7 @@ function* loginSaga(action: any) {
         yield put(setState(action.payload.credentials, 'credentials'));
         yield put(loadDataDone(data, action.meta));
         yield put(setState(data, 'auth'));
-        setCredentials({ ...action.payload.credentials });
+        setCredentials({ credentials: action.payload.credentials, auth: data });
         if (action.payload.redirectAfter) {
             yield put(push(action.payload.redirectAfter));
         }
@@ -45,7 +45,7 @@ function* loginSaga(action: any) {
 
 function* logoutSaga() {
     if (typeof window !== 'undefined') {
-        window.localStorage.removeItem('credentials');
+        clearCredentials();
     }
     yield all([put(resetData()), put(deleteState('auth')), put(deleteState('credentials'))]);
 }
@@ -56,8 +56,12 @@ export default function* saga() {
     // init
     const location = yield select(state => state.get('router').location);
     const credentials = yield select(state => state.getIn(['data', 'credentials']));
-    if (credentials && !/^\/login/g.test(location.pathname)) {
-        yield put(login({ credentials: credentials.toJS() }));
+    const auth = yield select(state => state.getIn(['data', 'auth']));
+
+    if (credentials && auth && !/^\/list/g.test(location.pathname)) {
+        yield put(push('/list'));
+    } else if ((!credentials || !auth) && !/^\/login/g.test(location.pathname)) {
+        yield put(push('/login'));
     }
 
     yield takeLatest((action: any) => action.type === 'LOGOUT', logoutSaga);

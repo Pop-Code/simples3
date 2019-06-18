@@ -21,10 +21,14 @@ export default class Client extends React.Component {
         this.history = createHistory();
 
         const credentials = getCredentials();
-        this.store = createReduxStore(
-            this.history,
-            credentials ? Map().setIn(['data', 'credentials'], fromJS(credentials)) : undefined
-        );
+
+        let state: Map<String, any> = Map();
+        if (credentials) {
+            state = state.setIn(['data', 'credentials'], fromJS(credentials.credentials));
+            state = state.setIn(['data', 'auth'], fromJS(credentials.auth));
+        }
+
+        this.store = createReduxStore(this.history, state);
     }
 
     render() {

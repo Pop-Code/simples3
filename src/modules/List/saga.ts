@@ -23,12 +23,14 @@ function* listSaga(action: any) {
 
 export default function* saga() {
     yield takeLatest((action: any) => action.type === 'LOAD_DATA' && action.meta === 'list', listSaga);
-    yield takeLatest(
+
+    /*yield takeLatest(
         (action: any) => action.type === 'SET_STATE' && action.meta === 'auth' && !action.error,
         function*() {
             yield put(loadData({}, 'list'));
         }
-    );
+    );*/
+
     yield takeLatest(selectFile, function*(action) {
         // get all files from state
         let files: Map<String, any> = yield select(s => selectDataAtPath(s, ['selectedFiles'], Map<String, any>()));

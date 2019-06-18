@@ -120,6 +120,12 @@ class ListView extends React.Component<ListViewProps> {
         }
     }
 
+    componentDidMount() {
+        if (this.props.data.length === 0) {
+            this.props.list({});
+        }
+    }
+
     private applyFilters(data: any[]) {
         if (!this.state.search) {
             return data;
@@ -153,11 +159,6 @@ class ListView extends React.Component<ListViewProps> {
                 <div className={classes.root}>
                     <Grid container spacing={3} justify="center">
                         <Grid item xs={12}>
-                            {error && (
-                                <Typography variant="body1" color="error">
-                                    {error.message}
-                                </Typography>
-                            )}
                             {data && (
                                 <Paper>
                                     <Table className={classes.table}>
@@ -171,11 +172,20 @@ class ListView extends React.Component<ListViewProps> {
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
-                                            {filteredData.length === 0 && (
+                                            {filteredData.length === 0 && !error && (
                                                 <TableRow>
                                                     <TableCell colSpan={5}>
                                                         <Typography align="center" color="primary">
                                                             No item.
+                                                        </Typography>
+                                                    </TableCell>
+                                                </TableRow>
+                                            )}
+                                            {error && (
+                                                <TableRow>
+                                                    <TableCell colSpan={5}>
+                                                        <Typography align="center" color="error">
+                                                            {error.message}
                                                         </Typography>
                                                     </TableCell>
                                                 </TableRow>

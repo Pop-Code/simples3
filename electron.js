@@ -25,7 +25,6 @@ function createWindow() {
             nodeIntegration: true
         }
     });
-    
 
     const startUrl =
         process.env.ELECTRON_START_URL ||
@@ -43,7 +42,7 @@ function createWindow() {
     win.on('closed', () => {
         windows.delete(win);
     });
-    
+
     windows.add(win);
 }
 

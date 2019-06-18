@@ -41,13 +41,16 @@ function createWindow() {
     });
     win.on('closed', () => {
         windows.delete(win);
+        if (windows.size === 0) {
+            app.quit();
+        }
     });
 
     windows.add(win);
 }
 
 app.on('window-all-closed', () => {
-    // app.quit();
+    app.quit();
 });
 
 app.on('ready', createWindow);
@@ -86,17 +89,6 @@ const template = [
     {
         role: 'window',
         submenu: [{ role: 'minimize' }, { role: 'close' }]
-    },
-    {
-        role: 'help',
-        submenu: [
-            {
-                label: 'Learn More',
-                click() {
-                    require('electron').shell.openExternal('https://electronjs.org');
-                }
-            }
-        ]
     }
 ];
 

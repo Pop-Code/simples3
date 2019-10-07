@@ -58,7 +58,6 @@
         "build": "react-scripts build",
         "build:electron": "build -mwl -c electron.json",
         "postinstall": "build install-app-deps",
-        "h": "build -h",
         "release": "yarn build:electron --publish always",
         "format": "prettier --write \"src/**/*.ts\"",
         "test": "react-scripts test",
